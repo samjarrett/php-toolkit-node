@@ -1,0 +1,23 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  - DOCKER_REPO="samjarrett/php-toolkit-node" BUILD_DIRECTORY="."
+
+before_script:
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
+  - docker pull ${DOCKER_REPO}:$TAG || true
+
+script:
+  - docker build --pull -t ${DOCKER_REPO}:build-$TRAVIS_BUILD_NUMBER ${BUILD_DIRECTORY}
+
+after_success:
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  # Push the build
+  - docker push ${DOCKER_REPO}:build-$TRAVIS_BUILD_NUMBER
+  # Tag build across to the branch (or latest, for master builds)
+  - docker tag ${DOCKER_REPO}:build-$TRAVIS_BUILD_NUMBER ${DOCKER_REPO}:$TAG
+  # If not a pull request, push it to the remote
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then docker push ${DOCKER_REPO}-node:$TAG; fi
