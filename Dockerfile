@@ -2,10 +2,10 @@ FROM samjarrett/php-toolkit
 
 ENV NODE_VERSION 7.4.0
 RUN set -xe && \
-    apk add --no-cache \
+    apk add --quiet --no-cache \
         libstdc++ \
         && \
-    apk add --no-cache --virtual .build-deps \
+    apk add --quiet --no-cache --virtual .build-deps \
         binutils-gold \
         curl \
         g++ \
@@ -35,9 +35,9 @@ RUN set -xe && \
     tar -xf "node-v$NODE_VERSION.tar.xz" && \
     cd "node-v$NODE_VERSION" && \
     ./configure && \
-    make -j$(getconf _NPROCESSORS_ONLN) --silent > /dev/null && \
+    make -j$(getconf _NPROCESSORS_ONLN) --silent && \
     make install && \
-    apk del .build-deps && \
+    apk del --quiet .build-deps && \
     cd .. && \
     rm -Rf "node-v$NODE_VERSION" && \
     rm "node-v$NODE_VERSION.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt && \
